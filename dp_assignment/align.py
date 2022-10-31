@@ -128,7 +128,22 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
         #####################
         # START CODING HERE #
         #####################
-        pass    # Change the zeroes in the first row and column to the correct values.
+        # Change the zeroes in the first row and column to the correct values.
+
+        score_matrix[0][0]='-'
+
+        for i in range(1, M):
+            score_matrix[i][0]=seq1[i-1]
+
+        for j in range(1, N):
+            score_matrix[0][j]=seq2[j-1]
+
+
+        #         score_matrix[0][j] = score_matrix[0][j-1] - gap_penalty
+        #         score_matrix[i][0] = score_matrix[i-1][0] - gap_penalty
+
+
+
         #####################
         #  END CODING HERE  #
         #####################
@@ -140,14 +155,16 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
     #####################
     # START CODING HERE #
     #####################
-    # def dp_function(...):
-    #     ...
-    #     return ...
-    #
-    # for i in range(1,M):
-    #     for j in range(1,N):
-    #         score_matrix[i][j] = dp_function(...)
-            
+
+    def dp_function():
+        score = 0
+        score = substitution_matrix[seq1[i-1]][seq2[j-1]]
+        return score    
+    
+    for i in range(1,M):
+        for j in range(1,N):
+            score_matrix[i][j] = dp_function()
+    print(score_matrix)
     #####################
     #  END CODING HERE  #
     #####################   
