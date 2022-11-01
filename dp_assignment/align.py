@@ -8,7 +8,7 @@ INSTRUCTIONS:
     Complete the code (compatible with Python 3!) upload to CodeGrade via corresponding Canvas assignment.
 
 AUTHOR:
-    <Name and student ID here!>
+    <Nikolaos Bounatsos - nbo222>
 """
 
 
@@ -123,26 +123,17 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
         score_matrix.append(row)
         for j in range(N):
             row.append(0)
-    
     if strategy == 'global':
         #####################
         # START CODING HERE #
         #####################
         # Change the zeroes in the first row and column to the correct values.
 
-        score_matrix[0][0]='-'
-
         for i in range(1, M):
-            score_matrix[i][0]=seq1[i-1]
+            score_matrix[i][0] = score_matrix[i-1][0] - gap_penalty
 
         for j in range(1, N):
-            score_matrix[0][j]=seq2[j-1]
-
-
-        #         score_matrix[0][j] = score_matrix[0][j-1] - gap_penalty
-        #         score_matrix[i][0] = score_matrix[i-1][0] - gap_penalty
-
-
+            score_matrix[0][j] = score_matrix[0][j-1] - gap_penalty
 
         #####################
         #  END CODING HERE  #
@@ -156,30 +147,66 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
     # START CODING HERE #
     #####################
 
-    def dp_function():
-        score = 0
-        score = substitution_matrix[seq1[i-1]][seq2[j-1]]
-        return score    
-    
+    def dp_function(): 
+        max_list=[]
+
+        # diagoneal
+        var_diagoneal = score_matrix[i-1][j-1] + substitution_matrix[seq1[i-1]][seq2[j-1]]
+
+        # downwards
+        var_down = score_matrix[i][j-1] - gap_penalty
+
+        # rightwards
+        var_right = score_matrix[i-1][j] - gap_penalty
+
+        max_list.extend([var_diagoneal, var_down, var_right])
+        return max(max_list)
+
     for i in range(1,M):
         for j in range(1,N):
             score_matrix[i][j] = dp_function()
-    print(score_matrix)
+
+    for i in range(M):
+        print(score_matrix[i])
     #####################
     #  END CODING HERE  #
     #####################   
-    
-    
+
     ### 3: Traceback
     
     #####################
     # START CODING HERE #
     #####################   
+    i=M-1
+    j=N-1
+    def tracing(i,j):
+        total_score = 0
+        while (i>1 and j>1):            
+            # diagoneal
+            var_diagoneal = score_matrix[i-1][j-1]
 
-    aligned_seq1 = 'foot'  # These are dummy values! Change the code so that
-    aligned_seq2 = 'bart'  # aligned_seq1 and _seq2 contain the input sequences
-    align_score = 0        # with gaps inserted at the appropriate positions.
+            # downwards
+            var_down = score_matrix[i][j-1]
 
+            # rightwards
+            var_right = score_matrix[i-1][j]
+
+            max_dict={
+                (i-1,j-1) : var_diagoneal,
+                (i,j-1) : var_down,
+                (i-1,j) : var_right
+            }
+            max_value = max(max_dict.values())
+            coords = max(max_dict, key=max_dict.get)
+            i = coords[0]
+            j = coords[1]
+            total_score += max_value
+        return total_score
+            
+    
+    aligned_seq1 = 'foot'   # These are dummy values! Change the code so that
+    aligned_seq2 = 'bart'   # aligned_seq1 and _seq2 contain the input sequences
+    align_score = tracing(i,j)       # with gaps inserted at the appropriate positions. 
     #####################
     #  END CODING HERE  #
     #####################   
