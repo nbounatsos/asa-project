@@ -166,8 +166,9 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
         for j in range(1,N):
             score_matrix[i][j] = dp_function()
 
-    for i in range(M):
-        print(score_matrix[i])
+    # for i in range(M):
+    #     print(score_matrix[i])
+
     #####################
     #  END CODING HERE  #
     #####################   
@@ -181,7 +182,12 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
     j=N-1
     def tracing(i,j):
         total_score = 0
-        while (i>1 and j>1):            
+        aligned_seq1 = ''
+        aligned_seq2 = ''
+        cnt1 = M - 2
+        cnt2 = N - 2
+        while (i>1 or j>1):      
+            
             # diagoneal
             var_diagoneal = score_matrix[i-1][j-1]
 
@@ -196,17 +202,40 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
                 (i,j-1) : var_down,
                 (i-1,j) : var_right
             }
+
             max_value = max(max_dict.values())
             coords = max(max_dict, key=max_dict.get)
+            prev_i = i
+            prev_j = j
             i = coords[0]
             j = coords[1]
+
+            if(prev_i-1 == i and prev_j-1 == j):
+                aligned_seq1 = seq1[cnt1] + aligned_seq1
+                aligned_seq2 = seq2[cnt2] + aligned_seq2
+                cnt1 -= 1
+                cnt2 -= 1
+            elif(prev_i-1 == i and prev_j == j):
+                aligned_seq1 = seq1[cnt1] + aligned_seq1
+                aligned_seq2 = '-' + aligned_seq2
+                cnt1 -= 1
+            elif(prev_i == i and prev_j-1 == j):
+                aligned_seq1 = '-' + aligned_seq1
+                aligned_seq2 = seq2[cnt2] + aligned_seq2
+                cnt2 -= 1
+            if(i==1 or j==1):
+                aligned_seq1 = seq1[cnt1] + aligned_seq1
+                aligned_seq2 = seq2[cnt2] + aligned_seq2
             total_score += max_value
-        return total_score
-            
-    
-    aligned_seq1 = 'foot'   # These are dummy values! Change the code so that
-    aligned_seq2 = 'bart'   # aligned_seq1 and _seq2 contain the input sequences
-    align_score = tracing(i,j)       # with gaps inserted at the appropriate positions. 
+        return total_score, aligned_seq1, aligned_seq2
+
+    x=0
+    aligned_seq1 = ''
+    aligned_seq2 = ''
+    align_score = score_matrix[M-1][N-1]
+    x, aligned_seq1, aligned_seq2 = tracing(i,j)
+    print(aligned_seq1)
+    print(aligned_seq2)
     #####################
     #  END CODING HERE  #
     #####################   
