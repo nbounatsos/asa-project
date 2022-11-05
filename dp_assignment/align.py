@@ -166,8 +166,7 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
         for j in range(1,N):
             score_matrix[i][j] = dp_function()
 
-    # for i in range(M):
-    #     print(score_matrix[i])
+    print_score_matrix(seq1, seq2, score_matrix)
 
     #####################
     #  END CODING HERE  #
@@ -178,70 +177,79 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
     #####################
     # START CODING HERE #
     #####################   
-    i=M-1
-    j=N-1
-    def tracing(i,j):
-        total_score = 0
-        aligned_seq1 = ''
-        aligned_seq2 = ''
-        cnt1 = M - 2
-        cnt2 = N - 2
-        while (i>1 or j>1):      
-            
-            # diagoneal
-            var_diagoneal = score_matrix[i-1][j-1]
+    
+    def tracing():
+        pass
 
-            # downwards
-            var_down = score_matrix[i][j-1]
+    def go_diagoneal(i, j):
+        return [score_matrix[i-1][j-1], i-1, j-1]
 
-            # rightwards
-            var_right = score_matrix[i-1][j]
+    def go_upwards(i, j):
+        return [score_matrix[i][j-1], i, j-1]
 
-            max_dict={
-                (i-1,j-1) : var_diagoneal,
-                (i,j-1) : var_down,
-                (i-1,j) : var_right
-            }
-
-            max_value = max(max_dict.values())
-            coords = max(max_dict, key=max_dict.get)
-            prev_i = i
-            prev_j = j
-            i = coords[0]
-            j = coords[1]
-
-            if(prev_i-1 == i and prev_j-1 == j):
-                aligned_seq1 = seq1[cnt1] + aligned_seq1
-                aligned_seq2 = seq2[cnt2] + aligned_seq2
-                cnt1 -= 1
-                cnt2 -= 1
-            elif(prev_i-1 == i and prev_j == j):
-                aligned_seq1 = seq1[cnt1] + aligned_seq1
-                aligned_seq2 = '-' + aligned_seq2
-                cnt1 -= 1
-            elif(prev_i == i and prev_j-1 == j):
-                aligned_seq1 = '-' + aligned_seq1
-                aligned_seq2 = seq2[cnt2] + aligned_seq2
-                cnt2 -= 1
-            if(i==1 or j==1):
-                aligned_seq1 = seq1[cnt1] + aligned_seq1
-                aligned_seq2 = seq2[cnt2] + aligned_seq2
-            total_score += max_value
-        return total_score, aligned_seq1, aligned_seq2
-
-    x=0
+    def go_leftwards(i, j):
+        return [score_matrix[i-1][j], i-1, j]
+    
+    x = M - 1
+    y = N - 1
     aligned_seq1 = ''
     aligned_seq2 = ''
+
+    if strategy == 'global':
+
+        while x >= 1 or y >= 1:
+            
+
+            max_score = -1000000
+            diagoneal = score_matrix[x-1][y-1]
+            leftwards = score_matrix[x][y-1]
+            upwards = score_matrix[x-1][y]
+
+            prev_x = x
+            prev_y = y
+
+            if (upwards > max_score) and (score_matrix[prev_x][prev_y] == (score_matrix[prev_x-1][prev_y] - gap_penalty)):
+                max_score = upwards
+                x = prev_x - 1
+                y = prev_y
+            if (leftwards > max_score) and (score_matrix[prev_x][prev_y] == (score_matrix[prev_x][prev_y-1] - gap_penalty)):
+                max_score = leftwards
+                x = prev_x
+                y = prev_y -1
+            if diagoneal > max_score:
+                max_score = diagoneal
+                x = prev_x - 1
+                y = prev_y - 1
+
+            # Upwards
+            if (prev_x-1 == x and prev_y == y) and prev_x - 1 >= 0:
+                aligned_seq1 = seq1[prev_x-1] + aligned_seq1
+                aligned_seq2 = '-' + aligned_seq2
+
+            # Diagoneal
+            elif (prev_x-1 == x and prev_y - 1 == y):
+                aligned_seq1 = seq1[prev_x-1] + aligned_seq1
+                aligned_seq2 = seq2[prev_y-1] + aligned_seq2
+            # Leftwards
+            elif (prev_x == x and prev_y - 1 == y) and prev_y - 1 >= 0:
+                aligned_seq1 = '-' + aligned_seq1
+                aligned_seq2 = seq2[prev_y-1] + aligned_seq2
+            # print(x,y)
+        print('Sequence1:', seq1) 
+        print('Sequence2:', seq2)
+
+    elif strategy == 'semiglobal' or 'local':
+        pass
+
     align_score = score_matrix[M-1][N-1]
-    x, aligned_seq1, aligned_seq2 = tracing(i,j)
-    print(aligned_seq1)
-    print(aligned_seq2)
+
     #####################
     #  END CODING HERE  #
     #####################   
 
 
     alignment = (aligned_seq1, aligned_seq2, align_score)
+    print_alignment(alignment)
     return (alignment, score_matrix)
 
 
