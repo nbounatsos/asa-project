@@ -123,11 +123,13 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
         score_matrix.append(row)
         for j in range(N):
             row.append(0)
-    if strategy == 'global':
+    
         #####################
         # START CODING HERE #
         #####################
         # Change the zeroes in the first row and column to the correct values.
+
+    if strategy == 'global':
 
         for i in range(1, M):
             score_matrix[i][0] = score_matrix[i-1][0] - gap_penalty
@@ -135,11 +137,17 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
         for j in range(1, N):
             score_matrix[0][j] = score_matrix[0][j-1] - gap_penalty
 
+    elif strategy == 'semiglobal':
+
+        pass
+
+    elif strategy == 'local':
+
+        pass
+
         #####################
         #  END CODING HERE  #
-        #####################
-
-    
+        #####################    
     
     ### 2: Fill in Score Matrix
  
@@ -185,6 +193,7 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
     y = N - 1
     aligned_seq1 = ''
     aligned_seq2 = ''
+    align_score = 0
 
     if strategy == 'global':
 
@@ -234,13 +243,17 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
                 aligned_seq1 = '-' + aligned_seq1
                 aligned_seq2 = seq2[prev_y-1] + aligned_seq2
 
+        align_score = score_matrix[M-1][N-1]
+
     elif strategy == 'semiglobal':
-        pass
+
+        # Find max value from last column
+        align_score = max(score_matrix[x])
 
     elif strategy == 'local':
         pass
 
-    align_score = score_matrix[M-1][N-1]
+    
 
     #####################
     #  END CODING HERE  #
