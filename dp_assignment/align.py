@@ -142,8 +142,8 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
         pass
 
     elif strategy == 'local':
-
         pass
+        
 
         #####################
         #  END CODING HERE  #
@@ -154,6 +154,11 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
     #####################
     # START CODING HERE #
     #####################
+
+    def local_sub(check_var):
+        if check_var < 0:
+            check_var = 0
+        return check_var
 
     def dp_function(): 
         max_list=[]
@@ -168,11 +173,39 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
         var_right = score_matrix[i-1][j] - gap_penalty
 
         max_list.extend([var_diagoneal, var_down, var_right])
+
         return max(max_list)
 
-    for i in range(1,M):
-        for j in range(1,N):
-            score_matrix[i][j] = dp_function()
+    def dp_local_function(): 
+        max_list=[]
+
+        # diagoneal
+        var_diagoneal = score_matrix[i-1][j-1] + substitution_matrix[seq1[i-1]][seq2[j-1]]
+        var_diagoneal = local_sub(var_diagoneal)
+
+        # downwards
+        var_down = score_matrix[i][j-1] - gap_penalty
+        var_down = local_sub(var_down)
+
+        # rightwards
+        var_right = score_matrix[i-1][j] - gap_penalty
+        var_right = local_sub(var_right)
+
+        max_list.extend([var_diagoneal, var_down, var_right])
+
+        return max(max_list)
+
+    if strategy == 'global' or strategy == 'semiglobal':
+
+        for i in range(1,M):
+            for j in range(1,N):
+                score_matrix[i][j] = dp_function()
+
+    elif strategy == 'local':
+        
+        for i in range(1,M):
+            for j in range(1,N):
+                score_matrix[i][j] = dp_local_function()
 
     print_score_matrix(seq1, seq2, score_matrix)
 
@@ -247,13 +280,159 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
 
     elif strategy == 'semiglobal':
 
-        # Find max value from last column
-        align_score = max(score_matrix[x])
+        max_score = -1000000
+        starting_x = 0
+        starting_y = 0        
+
+        # Get position and value of alignment score closest to bottom right corner
+
+        for j in range(N):
+            if score_matrix[len(seq1)][j] >= max_score:
+                max_score = score_matrix[len(seq1)][j]
+                starting_x = len(seq1)
+                starting_y = j
+
+        for i in range(M-1,-1,-1):
+            if score_matrix[i][len(seq2)] >= max_score:
+                max_score = score_matrix[i][len(seq2)]
+                starting_x = i
+                starting_y = len(seq2)
+
+        align_score = max_score
+
+        # N-terminus
+        if(starting_x != x):
+            n_terminus = x - starting_x
+            for i in range(n_terminus):
+                aligned_seq1 = seq1[-i-1] + aligned_seq1
+                aligned_seq2 = '-' + aligned_seq2
+        elif(starting_y != y):
+            n_terminus = y - starting_y
+            for i in range(n_terminus):
+                aligned_seq1 = '-' + aligned_seq1
+                aligned_seq2 = seq2[-i-1] + aligned_seq2   
+        else:
+            pass
+
+        # Traceback
+
+        x = starting_x
+        y = starting_y
+
+        while True:
+            
+            max_score = -1000000
+            diagoneal = score_matrix[x-1][y-1]
+            leftwards = score_matrix[x][y-1]
+            upwards = score_matrix[x-1][y]
+
+            prev_x = x
+            prev_y = y
+
+            # Upwards
+            if (score_matrix[prev_x][prev_y] == (score_matrix[prev_x-1][prev_y] - gap_penalty)) and prev_x-1 >= 0:
+                max_score = upwards
+                x = prev_x - 1
+                y = prev_y
+
+            # Diagoneal
+            elif (score_matrix[prev_x][prev_y] == score_matrix[prev_x-1][prev_y-1] + substitution_matrix[seq1[prev_x-1]][seq2[prev_y-1]] and prev_x-1 >= 0 and prev_y-1 >= 0 ):
+                max_score = diagoneal
+                x = prev_x - 1
+                y = prev_y - 1
+                    
+            # Leftwards
+            elif (score_matrix[prev_x][prev_y] == (score_matrix[prev_x][prev_y-1] - gap_penalty)) and prev_y-1 >= 0:
+                max_score = leftwards
+                x = prev_x
+                y = prev_y -1
+
+            # Upwards
+            if (prev_x-1 == x and prev_y == y):
+                aligned_seq1 = seq1[prev_x-1] + aligned_seq1
+                aligned_seq2 = '-' + aligned_seq2
+
+            # Diagoneal
+            elif (prev_x-1 == x and prev_y - 1 == y):
+                aligned_seq1 = seq1[prev_x-1] + aligned_seq1
+                aligned_seq2 = seq2[prev_y-1] + aligned_seq2
+
+            # Leftwards
+            elif (prev_x == x and prev_y - 1 == y):
+                aligned_seq1 = '-' + aligned_seq1
+                aligned_seq2 = seq2[prev_y-1] + aligned_seq2
+
+            # C-terminus
+            if x == 0 :
+                for i in range(y):
+                    aligned_seq1 = '-' + aligned_seq1
+                    aligned_seq2 = seq2[y-i-1] + aligned_seq2
+                break
+
+            elif y == 0:
+                for i in range(x):
+                    aligned_seq1 = seq1[x-i-1] + aligned_seq1
+                    aligned_seq2 = '-' + aligned_seq2
+                break
 
     elif strategy == 'local':
-        pass
+                
+        max_score = -1000000
+        starting_x = 0
+        starting_y = 0  
 
-    
+        for i in range(M):
+            for j in range(N):
+                if score_matrix[i][j] > max_score:
+                    max_score = score_matrix[i][j]
+                    starting_x = i
+                    starting_y = j
+                elif score_matrix[i][j] == max_score:
+                    if j > starting_y:
+                        max_score = score_matrix[i][j]
+                        starting_x = i
+                        starting_y = j
+        align_score = max_score
+        aligned_seq1 = seq1[starting_x-1] + aligned_seq1
+        aligned_seq2 = seq2[starting_y-1] + aligned_seq2
+
+        x = starting_x
+        y = starting_y
+
+        while score_matrix[x][y] != 0:
+            
+            max_score = -1
+            diagoneal = score_matrix[x-1][y-1]
+            leftwards = score_matrix[x][y-1]
+            upwards = score_matrix[x-1][y]
+
+            prev_x = x
+            prev_y = y
+
+            # Diagoneal
+            if diagoneal > max_score:
+                max_score = diagoneal
+                x = prev_x - 1
+                y = prev_y - 1
+
+            # Upwards
+            elif (score_matrix[prev_x][prev_y] == (score_matrix[prev_x-1][prev_y] - gap_penalty)):
+                max_score = upwards
+                x = prev_x - 1
+                y = prev_y
+
+                    
+            # Leftwards
+            elif (score_matrix[prev_x][prev_y] == (score_matrix[prev_x][prev_y-1] - gap_penalty)):
+                max_score = leftwards
+                x = prev_x
+                y = prev_y -1
+
+            if max_score != 0:
+                aligned_seq1 = seq1[x-1] + aligned_seq1
+                aligned_seq2 = seq2[y-1] + aligned_seq2
+
+        
 
     #####################
     #  END CODING HERE  #
