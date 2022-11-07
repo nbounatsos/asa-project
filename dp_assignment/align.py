@@ -381,6 +381,8 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
         starting_x = 0
         starting_y = 0  
 
+
+        # Get align score and starting postition
         for i in range(M):
             for j in range(N):
                 if score_matrix[i][j] > max_score:
@@ -393,13 +395,11 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
                         starting_x = i
                         starting_y = j
         align_score = max_score
-        aligned_seq1 = seq1[starting_x-1] + aligned_seq1
-        aligned_seq2 = seq2[starting_y-1] + aligned_seq2
 
         x = starting_x
         y = starting_y
 
-        while score_matrix[x][y] != 0:
+        while True:
             
             max_score = -1
             diagoneal = score_matrix[x-1][y-1]
@@ -409,30 +409,47 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
             prev_x = x
             prev_y = y
 
-            # Diagoneal
-            if diagoneal > max_score:
-                max_score = diagoneal
-                x = prev_x - 1
-                y = prev_y - 1
+            print(score_matrix[prev_x][prev_y], substitution_matrix[seq1[prev_x-2]][seq2[prev_y-1]])
 
             # Upwards
-            elif (score_matrix[prev_x][prev_y] == (score_matrix[prev_x-1][prev_y] - gap_penalty)):
+            if (score_matrix[prev_x-1][prev_y] - gap_penalty == score_matrix[prev_x][prev_y]):
                 max_score = upwards
                 x = prev_x - 1
                 y = prev_y
 
+            # Diagoneal
+
+            elif (score_matrix[prev_x-1][prev_y-1] == (score_matrix[prev_x][prev_y] - substitution_matrix[seq1[prev_x-1]][seq2[prev_y-1]])):
+                max_score = diagoneal
+                x = prev_x - 1
+                y = prev_y - 1
+                print(seq1[x-1], seq2[y-1])
                     
             # Leftwards
-            elif (score_matrix[prev_x][prev_y] == (score_matrix[prev_x][prev_y-1] - gap_penalty)):
+            elif (score_matrix[prev_x][prev_y-1] - gap_penalty == score_matrix[prev_x][prev_y]):
                 max_score = leftwards
                 x = prev_x
                 y = prev_y -1
+            else:
+                break
 
-            if max_score != 0:
-                aligned_seq1 = seq1[x-1] + aligned_seq1
-                aligned_seq2 = seq2[y-1] + aligned_seq2
+            # Upwards
+            if (prev_x-1 == x and prev_y == y):
+                aligned_seq1 = seq1[prev_x-1] + aligned_seq1
+                aligned_seq2 = '-' + aligned_seq2
 
-        
+            # Diagoneal
+            elif (prev_x-1 == x and prev_y - 1 == y):
+                aligned_seq1 = seq1[prev_x-1] + aligned_seq1
+                aligned_seq2 = seq2[prev_y-1] + aligned_seq2
+
+            # Leftwards
+            elif (prev_x == x and prev_y - 1 == y):
+                aligned_seq1 = '-' + aligned_seq1
+                aligned_seq2 = seq2[prev_y-1] + aligned_seq2    
+
+            if x == 0 or y == 0:
+                break
 
     #####################
     #  END CODING HERE  #
