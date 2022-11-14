@@ -409,8 +409,6 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
             prev_x = x
             prev_y = y
 
-            print(score_matrix[prev_x][prev_y], substitution_matrix[seq1[prev_x-2]][seq2[prev_y-1]])
-
             # Upwards
             if (score_matrix[prev_x-1][prev_y] - gap_penalty == score_matrix[prev_x][prev_y]):
                 max_score = upwards
@@ -423,7 +421,6 @@ def align(seq1, seq2, strategy, substitution_matrix, gap_penalty):
                 max_score = diagoneal
                 x = prev_x - 1
                 y = prev_y - 1
-                print(seq1[x-1], seq2[y-1])
                     
             # Leftwards
             elif (score_matrix[prev_x][prev_y-1] - gap_penalty == score_matrix[prev_x][prev_y]):
