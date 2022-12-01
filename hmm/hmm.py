@@ -114,9 +114,17 @@ def backward(X,A,E):
     # START CODING HERE #
     #####################
     # Remaining columns
-    # for i in range(L-3,-1,-1):
-    #     s = seq[i]
-    #     ...
+
+    for i in range(L-3,-1,-1):
+        s=X[i]
+        for k in allStates:
+            terms=0
+            for j in allStates:
+                if j == 'B' or j == 'E':
+                    terms+=B[j][i+1] * A[k][j]
+                else:
+                    terms+=B[j][i+1] * E[j][s] * A[k][j]
+            B[k][i]=terms
 
     #####################
     #  END CODING HERE  #
@@ -159,6 +167,8 @@ def baumwelch(set_X,A,E):
         # Calculate the expected transitions and emissions for the sequence.
         # Add the contributions to your posterior matrices.
         # Remember to normalize to the sequence's probability P!
+
+    
         
     # Outside the for loop: Maximization
     # Normalize row sums to 1 (except for one row in the Transition matrix!)
