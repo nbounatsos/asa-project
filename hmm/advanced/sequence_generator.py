@@ -12,7 +12,7 @@ INSTRUCTIONS:
     training! Continuous Feedback will not be available for this script.
 
 AUTHOR:
-    <your name and student number here>
+    Nikolaos Bounatsos #2768686
 """
 
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -31,7 +31,8 @@ def parse_args():
     # (from the Dynamic Programming exercise) for hints on how to do this.
 
     parser = ArgumentParser()
-    # parser.add_argument(?)
+    parser.add_argument('command', help='which algorithm to run',
+        choices=['viterbi','forward','backward','baumwelch'])
     # parser.add_argument(?)
     # parser.add_argument(?)
     # parser.add_argument(?)

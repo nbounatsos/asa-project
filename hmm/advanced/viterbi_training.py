@@ -12,7 +12,7 @@ INSTRUCTIONS:
     training!
 
 AUTHOR:
-    <your name and student number here>
+    Nikolaos Bounatsos #2768686
 """
 
 import os.path as op

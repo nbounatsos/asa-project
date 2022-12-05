@@ -168,12 +168,40 @@ def baumwelch(set_X,A,E):
         # Add the contributions to your posterior matrices.
         # Remember to normalize to the sequence's probability P!
 
-    
+        for k in allStates:
+            for j in allStates:
+                terms_a = 0
+                if j == 'B':
+                    pass
+                elif j == 'E':
+                    terms_a += (F[k][len(X)]*A[k][j])/P
+                else:
+                    for i in range(len(X)):
+                        terms_a += (F[k][i]*A[k][j]*E[j][X[i]]*B[j][i+1])/P
+                new_A[k][j] += terms_a
+
+        for l in emittingStates:
+            for i in range(len(X)):
+                new_E[l][X[i]] += (F[l][i+1]*B[l][i+1])/P
         
     # Outside the for loop: Maximization
     # Normalize row sums to 1 (except for one row in the Transition matrix!)
-    # new_A = ...
-    # new_E = ...
+
+    for k in allStates:
+        norm = 0
+        for x in new_A[k]:
+            norm += new_A[k][x]
+        for x in new_A[k]:
+            if norm != 0:
+                new_A[k][x] /= norm
+
+    for l in emittingStates:
+        norm = 0
+        for x in new_E[l]:
+            norm += new_E[l][x]
+        for x in new_E[l]:
+            if norm != 0:
+                new_E[l][x] /= norm
 
     #####################
     #  END CODING HERE  #

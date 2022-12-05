@@ -8,7 +8,7 @@ INSTRUCTIONS:
     Complete the code (compatible with Python 3!) upload to CodeGrade via corresponding Canvas assignment.
 
 AUTHOR:
-    <your name and student number here>
+    Nikolaos Bounatsos #2768686
 """
 
 import os.path as op
@@ -75,15 +75,18 @@ def forward(X,A,E):
     #####################
     # START CODING HERE #
     #####################
-    # HINT: The Viterbi and Forward algorithm are very similar! 
+    # HINT: The Viterbi and Forward algorithm are very similar!
     # Adapt the viterbi() function to account for the differences.
 
     # Middle columns
-    # for ...
+    for i,s in enumerate(X):
+        for l in emittingStates:
+            terms = [F[k][i] * A[k][l] for k in allStates]
+            F[l][i+1] = sum(terms) * E[l][s]
 
     # Last columns
-    # for ...:
-    #     F['E'][-1] += ...
+    for k in allStates:
+        F['E'][-1] += A[k]['E'] * F[k][i+1]
 
     #####################
     #  END CODING HERE  #
@@ -111,9 +114,17 @@ def backward(X,A,E):
     # START CODING HERE #
     #####################
     # Remaining columns
-    # for i in range(L-3,-1,-1):
-    #     s = seq[i]
-    #     ...
+
+    for i in range(L-3,-1,-1):
+        s=X[i]
+        for k in allStates:
+            terms=0
+            for j in allStates:
+                if j == 'B' or j == 'E':
+                    terms+=B[j][i+1] * A[k][j]
+                else:
+                    terms+=B[j][i+1] * E[j][s] * A[k][j]
+            B[k][i]=terms
 
     #####################
     #  END CODING HERE  #
@@ -153,14 +164,57 @@ def baumwelch(set_X,A,E):
         #####################
 
         # Inside the for loop: Expectation
-        # Count how often you observe each transition and emission.
-        # Add the counts to your posterior matrices.
+        # Calculate the expected transitions and emissions for the sequence.
+        # Add the contributions to your posterior matrices.
         # Remember to normalize to the sequence's probability P!
+        
+        # for k in allStates:
+        #     for j in allStates:
+        #         terms_a = 0
+        #         if j == 'B':
+        #             pass
+        #         elif j == 'E':
+        #             terms_a = (F[k][len(X)]*A[k][j])/P
+        #         else:
+        #             for i in range(len(X)):
+        #                 terms_a += (F[k][i]*A[k][j]*E[j][X[i]]*B[j][i+1])/P
+        #         new_A[k][j] = terms_a
+
+        for k in allStates:
+            for j in allStates:
+                terms_a = 0
+                if j == 'B':
+                    pass
+                elif j == 'E':
+                    terms_a += (F[k][len(X)]*A[k][j])/P
+                else:
+                    for i in range(len(X)):
+                        terms_a += (F[k][i]*A[k][j]*E[j][X[i]]*B[j][i+1])/P
+                new_A[k][j] += terms_a
+
+        for l in emittingStates:
+            for i in range(len(X)):
+                new_E[l][X[i]] += (F[l][i+1]*B[l][i+1])/P
         
     # Outside the for loop: Maximization
     # Normalize row sums to 1 (except for one row in the Transition matrix!)
-    # new_A = ...
-    # new_E = ...
+
+    for k in allStates:
+        norm = 0
+        for x in new_A[k]:
+            norm += new_A[k][x]
+        for x in new_A[k]:
+            if norm != 0:
+                new_A[k][x] /= norm
+
+
+    for l in emittingStates:
+        norm = 0
+        for x in new_E[l]:
+            norm += new_E[l][x]
+        for x in new_E[l]:
+            if norm != 0:
+                new_E[l][x] /= norm
 
     #####################
     #  END CODING HERE  #
@@ -256,7 +310,10 @@ def main(args = False):
             if verbosity >= 2: print_params(A,E)
 
         converged = current_SLL - last_SLL <= threshold
-        final_SLL = sum([log10(forward(X,A,E)[0]) for X in set_X])
+        try:
+            final_SLL = sum([log10(forward(X,A,E)[0]) for X in set_X])
+        except ValueError:
+            final_SLL = 0
 
         # Save and/or print relevant output
         save('SLL','%1.2e\t%i\t%s' % (final_SLL, i, converged))
