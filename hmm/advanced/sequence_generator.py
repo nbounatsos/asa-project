@@ -72,30 +72,22 @@ def generate_sequence(A,E):
     sequence = ''
     
     while True:
-        cur_state = ''.join(choice(allStates, 1, p=generate_a_probabilities(cur_state,A,allStates)))
+        cur_state = ''.join(choice(allStates, 1, p=generate_probabilities(cur_state,A,allStates)))
         if cur_state == 'E':
             break
-        emit = choice(emittingStates,1, p=generate_e_probabilities(cur_state,E,emittingStates))
+        emit = choice(emittingStates,1, p=generate_probabilities(cur_state,E,emittingStates))
         sequence += sequence.join(emit)
-    print(sequence)
-        
-    
     #####################
     #  END CODING HERE  #
     #####################
     
     return sequence
 
-def generate_a_probabilities(state,A,allStates):
-    p = []
-    for k in allStates:
-        p.append(A[state][k])
-    return p
 
-def generate_e_probabilities(state,E,emittingStates):
+def generate_probabilities(state, ar, states):
     p = []
-    for l in emittingStates:
-        p.append(E[state][l])
+    for i in states:
+        p.append(ar[state][i])
     return p
 
 
