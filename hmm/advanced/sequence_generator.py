@@ -15,6 +15,7 @@ AUTHOR:
     Nikolaos Bounatsos #2768686
 """
 
+import os
 from argparse import ArgumentParser, RawTextHelpFormatter
 from hmm_utility import load_tsv
 from numpy.random import choice
@@ -30,12 +31,24 @@ def parse_args():
     # argparse documentation, the parser in hmm_utility.py or align.py
     # (from the Dynamic Programming exercise) for hints on how to do this.
 
-    parser = ArgumentParser()
-    parser.add_argument('command', help='which algorithm to run',
-        choices=['viterbi','forward','backward','baumwelch'])
-    # parser.add_argument(?)
-    # parser.add_argument(?)
-    # parser.add_argument(?)
+    parser = ArgumentParser(prog = 'python3 sequence_generator.py',
+        formatter_class = RawTextHelpFormatter, description =
+        '  Generates sequences from given transmission and emission matrices')
+
+    # Positionals
+    parser.add_argument('transition', help='path to a TSV formatted transition matrix')
+    parser.add_argument('emission', help='path to a TSV formatted emission matrix')
+
+
+    # Optionals
+    parser.add_argument('-n', dest='seq_num', type=int, default=1,
+    help='The number of sequences to generate. Default: 1') 
+    parser.add_argument('-o', dest='out_dir', default= os.getcwd()+'/seq.fasta',
+    help='path to a directory where output files are saved\n'
+             '  (directory will be made if it does not exist)\n'
+             '  (file names and contents depend on algorithm)')
+     
+    return parser.parse_args()
     
     #####################
     #  END CODING HERE  #
@@ -49,10 +62,23 @@ def generate_sequence(A,E):
     # Implement a function that generates a random sequence using the choice()
     # function, given a Transition and Emission matrix.
     
-    # Look up its documentation online:
-    # https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.random.choice.html
-            
-    sequence = '?'
+    for k in E:
+        emittingStates = list(E[k].keys())
+        break
+
+    allStates = list(A.keys())
+    cur_state = 'B'
+    emit = ''
+    sequence = ''
+    
+    while True:
+        cur_state = ''.join(choice(allStates, 1, p=generate_a_probabilities(cur_state,A,allStates)))
+        if cur_state == 'E':
+            break
+        emit = choice(emittingStates,1, p=generate_e_probabilities(cur_state,E,emittingStates))
+        sequence += sequence.join(emit)
+    print(sequence)
+        
     
     #####################
     #  END CODING HERE  #
@@ -60,23 +86,29 @@ def generate_sequence(A,E):
     
     return sequence
 
+def generate_a_probabilities(state,A,allStates):
+    p = []
+    for k in allStates:
+        p.append(A[state][k])
+    return p
+
+def generate_e_probabilities(state,E,emittingStates):
+    p = []
+    for l in emittingStates:
+        p.append(E[state][l])
+    return p
 
 
 def main():
     args = parse_args()
-    #####################
-    # START CODING HERE #
-    #####################
-    # Uncomment and complete (i.e. replace '?' in) the lines below:
-    
-    # N = args.?               # The number of sequences to generate
-    # out_file = args.?        # The file path to which to save the sequences
-    # A = load_tsv(args.? )    # Transition matrix
-    # E = load_tsv(args.? )    # Emission matrix
-    # with open(out_file,'w') as f:
-        # for i in range(N):
-        #     seq = ?
-        #     f.write('>random_sequence_%i\n%s\n' % (i,seq))
+    N = args.seq_num               # The number of sequences to generate
+    out_file = args.out_dir        # The file path to which to save the sequences
+    A = load_tsv(args.transition)    # Transition matrix
+    E = load_tsv(args.emission)    # Emission matrix
+    with open(out_file,'w') as f:
+        for i in range(N):
+            seq = generate_sequence(A,E)
+            f.write('>random_sequence_%i\n%s\n' % (i,seq))
         
     #####################
     #  END CODING HERE  #

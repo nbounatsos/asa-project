@@ -25,6 +25,7 @@ def viterbi(X,A,E):
 
     allStates = A.keys()
     emittingStates = E.keys()
+    print(emittingStates)
     L = len(X) + 2
 
     # Initialize

@@ -55,11 +55,13 @@ def train_viterbi(X,A,E):
     # START CODING HERE #
     #####################
     # Initialize your posterior matrices
-    new_A = {}    
-    # for k in A: ...
-
+    new_A = {}
+    for k in A:
+        new_A[k] = {l:0 for l in A[k]}
+    
     new_E = {}
-    # for k in E: ...
+    for k in E:
+        new_E[k] = {s:0 for s in E[k]}
     
 
     # Get the state path of every sequence in X,
