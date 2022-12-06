@@ -55,6 +55,10 @@ def train_viterbi(X,A,E):
     # START CODING HERE #
     #####################
     # Initialize your posterior matrices
+
+    allStates = A.keys()
+    emittingStates = E.keys()
+
     new_A = {}
     for k in A:
         new_A[k] = {l:0 for l in A[k]}
@@ -66,20 +70,58 @@ def train_viterbi(X,A,E):
 
     # Get the state path of every sequence in X,
     # using the viterbi() function imported from hmm.py
-    for seq,label in X:
-        # ...
-        pass
 
+    # for seq, label in X:
+    for x in X:
+        pi, P, V = viterbi(x,A,E)
         # Count the transitions and emissions for every state
 
+        # Transitions
+
+        # First state path
+        new_A['B'][pi[0]] += 1
+
+        # Rest columns
+        for i,state in enumerate(pi):
+            if i==0:
+                pass
+            else:
+                new_A[pi[i-1]][pi[i]] += 1
+            new_E[state][x[i]] += 1
+        # End
+        new_A[pi[len(pi)-1]]['E'] += 1
+
+        # Emissions
+
+        # for i , state in enumerate(pi):
+            
 
     # Normalize your row sums
 
+    for k in allStates:
+        norm = 0
+        for x in new_A[k]:
+            norm += new_A[k][x]
+        for x in new_A[k]:
+            if norm != 0:
+                new_A[k][x] /= norm
+
+
+    for l in emittingStates:
+        norm = 0
+        for x in new_E[l]:
+            norm += new_E[l][x]
+        for x in new_E[l]:
+            if norm != 0:
+                new_E[l][x] /= norm
 
     #####################
     #  END CODING HERE  #
     #####################
-    
+
+
+    print(new_A, new_E)
+
     return new_A, new_E
 
 
@@ -94,6 +136,7 @@ def main(args = False):
     E = load_tsv(args.emission)   # Nested Q -> S dictionary
     
     i_max = args.max_iter
+    i = 1
     
     #####################
     # START CODING HERE #
@@ -102,6 +145,11 @@ def main(args = False):
     # Note Viterbi converges discretely (unlike Baum-Welch), so you don't need to
     # track your Sum Log-Likelihood to decide this.
 
+    A, E = train_viterbi(set_X,A,E)
+
+    while i < i_max:
+        i += 1
+        A, E = train_viterbi(set_X,A,E)
 
     #####################
     #  END CODING HERE  #
