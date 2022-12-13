@@ -1,0 +1,13 @@
+Failed to converge after 100 iterations.
+Final SLL: -2.83e+03
+Final parameters:
+
+[A]   B     D     L     E     
+    B 0.000 0.921 0.079 0.000 
+    D 0.000 0.777 0.175 0.048 
+    L 0.000 0.260 0.727 0.013 
+    E 0.000 0.000 0.000 0.000 
+
+[E]   C     H     P     
+    D 0.115 0.768 0.118 
+    L 0.377 0.284 0.339 
